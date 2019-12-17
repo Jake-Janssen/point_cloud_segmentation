@@ -45,7 +45,7 @@ class dataLoader():
         self.use_full_image = self.config.USE_FULL_IMAGE
         self.augmentations = config.AUGMENTATIONS
 
-        # used for augmentationsf
+        # used for augmentations
         self.datagen = ImageDataGenerator(
             rotation_range=config.AUGMENTATIONS["rotation_range"],
             brightness_range = None,
@@ -81,7 +81,7 @@ class dataLoader():
         # go through every directory
         for directory in data_dirs:
                         
-            data_path = directory['dir_path']
+            data_path = os.path.dirname(os.path.realpath(__file__)).rsplit('/' , 2)[0] + '/scripts/' +  directory['dir_path']
 
             if directory['labels']:
                 label_path = data_path.split("/")[0:-1]
@@ -97,9 +97,6 @@ class dataLoader():
                 fnames = [fname.split('/')[-1] for fname in fnames]
             else:
                 fnames = os.listdir(data_path)
-                #fnames = [data_path + '/' + fname for fname in fnames]
-                #fnames = [fname for fname in fnames]
-
 
             if directory['num_imgs'] != 'all':
                 # calculate the number of interval for to get num_imgs of files evenly spaced out
@@ -107,7 +104,7 @@ class dataLoader():
                 # fnames now holds all the files of interest
                 fnames = fnames[::skip_interval]
 
-            print('[Loading] {} paths from {}.'.format(len(fnames),  directory['dir_path'].split('/')[-3])) # should be -2
+            print('[Loading] {} paths from {}.'.format(len(fnames),  directory['dir_path'].split('/')[-2])) 
 
             # get the full path for file names
             fnames = ['{0}/{1}'.format(data_path, fname) for fname in fnames]
@@ -135,12 +132,12 @@ class dataLoader():
 
         # create the background mask
         background_mask = np.zeros((label.shape[0], label.shape[1]),  dtype=np.float32)
-        kernel = np.ones((3,3),np.uint8) # was 5x5
+        kernel = np.ones((3,3),np.uint8)
         bin_label = np.sum(label, axis = -1)
         # convert the image to 2bit so it plays nice with dilate 
         bin_label[bin_label>0] = 1
         # dialate the label to create the area that will be ignored 
-        background_mask = cv2.dilate(bin_label,kernel,iterations = 1) # was 2 
+        background_mask = cv2.dilate(bin_label,kernel,iterations = 1)
         # flip the dialated label to get background
         background_mask = np.where(background_mask>0, 0, 1)
 
@@ -171,7 +168,7 @@ class dataLoader():
         '''
         # get the total amount of labeled pixels in the batch 
         imgs_per_batch = label_batch.shape[0]
-        label_px_batch = np.count_nonzero(label_batch[:, :, :, 1:-1])
+        label_px_batch = np.count_nonzero(label_batch[:, :, :, (len(self.config.BACKGROUND_CLASS_NAMES)+1):])
         background_px_per_img = (label_px_batch/imgs_per_batch) * self.config.BACKGROUND_REDUCTION
 
         # if the whole batch is background then leave then make it all ignore
@@ -317,7 +314,7 @@ class dataLoader():
                 # genereate the label
                 try:
                     key = file_path.split('/')
-                    key = key[-4] + '/' + key[-1] # change -4 back to -3
+                    key = key[-3] + '/' + key[-1] 
                     label_contours = self.xml_labels[key]
                     label = np.zeros((img_data.shape[0], img_data.shape[1], len(self.config.CLASS_NAMES))).astype(np.float64)
                     for cnt, user_label in enumerate(self.config.CLASS_NAMES):

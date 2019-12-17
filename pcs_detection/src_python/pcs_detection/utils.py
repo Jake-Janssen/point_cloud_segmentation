@@ -42,7 +42,7 @@ def get_labels_from_xml(label_path):
     
     # name of the outer directory this label corresponds to
     # allows for images in different directories to have the same filename 
-    dataset_name = label_path.split('/')[-3] # change -3 back to -2
+    dataset_name = label_path.split('/')[2]
 
     for image_tag in root.iter('image'):
         image = {}

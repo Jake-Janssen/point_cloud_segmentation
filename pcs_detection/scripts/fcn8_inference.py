@@ -34,10 +34,6 @@ import json
 import os
 import sys
 
-
-import tensorflow as tf
-from keras.backend.tensorflow_backend import set_session
-
 # Inference module
 from pcs_detection.inference import Inference
 
