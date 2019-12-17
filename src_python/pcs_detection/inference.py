@@ -102,10 +102,8 @@ class Inference():
         prediction = prediction[0]
         prediction[:,:,0] += self.config.CONFIDENCE_THRESHOLD
 
-        # practical min max normalization 
-        # values will depend on application 
-        prediction += 40
-        prediction /= 80
+        # normalize between 0 and 1
+        prediction = prediction/self.config.PREDICTION_MAX_RANGE + 0.5
 
         # get the max value of the prediction
         val_prediction = np.max(prediction,axis=-1)

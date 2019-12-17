@@ -220,8 +220,7 @@ def validate(config):
 
             # practical min max normalization 
             # values will depend on application 
-            prediction += 40
-            prediction /= 80
+            prediction = prediction/config.PREDICTION_MAX_RANGE + 0.5
 
             # get the max value of the prediction
             val_prediction = np.max(prediction,axis=-1)
